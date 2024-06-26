@@ -11,10 +11,17 @@ namespace FinalProjectAPBD.Controllers;
 public class AppUserController : ControllerBase
 {
     private BooksContext _context;
-
+    
     public AppUserController(BooksContext context)
     {
         _context = context;
+    }
+    
+    [HttpGet("getUsers")]
+    public IActionResult GetAppUsers()
+    {
+        var result = _context.AppUsers;
+        return Ok(result);
     }
 
     [AllowAnonymous]
@@ -22,7 +29,7 @@ public class AppUserController : ControllerBase
     public IActionResult RegisterUser(RegisterRequest model)
     {
         var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt(model.Password);
-
+    
         var user = new AppUser()
         {
             Email = model.Email,
@@ -32,10 +39,10 @@ public class AppUserController : ControllerBase
             RefreshToken = SecurityHelpers.GenerateRefreshToken(),
             RefreshTockenExp = DateTime.Now.AddDays(1)
         };
-
+    
         _context.AppUsers.Add(user);
         _context.SaveChanges();
-
+    
         return Ok();
     }
 }
