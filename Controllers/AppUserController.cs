@@ -1,8 +1,13 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using FinalProjectAPBD.Context;
 using FinalProjectAPBD.Helpers;
 using FinalProjectAPBD.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using JwtSecurityToken = System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
 
 namespace FinalProjectAPBD.Controllers;
 
@@ -11,10 +16,12 @@ namespace FinalProjectAPBD.Controllers;
 public class AppUserController : ControllerBase
 {
     private BooksContext _context;
+    private IConfiguration _configuration;
     
-    public AppUserController(BooksContext context)
+    public AppUserController(BooksContext context, IConfiguration configuration)
     {
         _context = context;
+        _configuration = configuration;
     }
     
     [HttpGet("getUsers")]
@@ -45,4 +52,113 @@ public class AppUserController : ControllerBase
     
         return Ok();
     }
+
+    [Authorize(Roles = "admin")]
+    [HttpGet("SecretData")]
+    public IActionResult GetSecretData()
+    {
+        var claimsFromAccessToken = User.Claims;
+        var roles = User.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
+        return Ok("Secret Data");
+    }
+
+    [AllowAnonymous]
+    [HttpGet("GetPublicData")]
+    public IActionResult GetPublicData()
+    {
+        return Ok("Public Data");
+    }
+
+    [AllowAnonymous]
+    [HttpPost("login")]
+    public IActionResult Login(LoginRequest loginRequest)
+    {
+        AppUser user = _context.AppUsers.Where(u => u.Login == loginRequest.Login).FirstOrDefault();
+
+        string passwordHashFromDb = user.Password;
+        string curHashedPassword = SecurityHelpers.GetHashedPasswordWithSalt(loginRequest.Password, user.Salt);
+
+        if (passwordHashFromDb != curHashedPassword)
+        {
+            return Unauthorized();
+        }
+
+
+        Claim[] userclaim = new[]
+        {
+            new Claim(ClaimTypes.Name, "pgago"),
+            new Claim(ClaimTypes.Role, "admin"),
+            
+            //Add additional data here
+        };
+
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
+
+        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        JwtSecurityToken token = new JwtSecurityToken(
+            issuer: "https://localhost:5278",
+            audience: "https://localhost:5278",
+            claims: userclaim,
+            expires: DateTime.Now.AddMinutes(10),
+            signingCredentials: creds
+        );
+
+        user.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+        user.RefreshTockenExp = DateTime.Now.AddDays(1);
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            accessToken = new JwtSecurityTokenHandler().WriteToken(token),
+            refreshToken = user.RefreshToken
+        });
+ 
+    }
+    
+    [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme")]
+    [HttpPost("refresh")]
+    public IActionResult Refresh(RefreshTokenRequest refreshToken)
+    {
+        AppUser user = _context.AppUsers.Where(u => u.RefreshToken == refreshToken.RefreshToken).FirstOrDefault();
+        if (user == null)
+        {
+            throw new SecurityTokenException("Invalid refresh token");
+        }
+
+        if (user.RefreshTockenExp < DateTime.Now)
+        {
+            throw new SecurityTokenException("Refresh token expired");
+        }
+        
+        Claim[] userclaim = new[]
+        {
+            new Claim(ClaimTypes.Name, "pgago"),
+            new Claim(ClaimTypes.Role, "admin")
+            //Add additional data here
+        };
+
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
+
+        SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        JwtSecurityToken jwtToken = new JwtSecurityToken(
+            issuer: "https://localhost:5278",
+            audience: "https://localhost:5278",
+            claims: userclaim,
+            expires: DateTime.Now.AddMinutes(10),
+            signingCredentials: creds
+        );
+
+        user.RefreshToken = SecurityHelpers.GenerateRefreshToken();
+        user.RefreshTockenExp = DateTime.Now.AddDays(1);
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            accessToken = new JwtSecurityTokenHandler().WriteToken(jwtToken),
+            refreshToken = user.RefreshToken
+        });
+    }
+ 
 }
