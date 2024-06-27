@@ -17,13 +17,13 @@ public class AppUserController : ControllerBase
 {
     private BooksContext _context;
     private IConfiguration _configuration;
-    
+
     public AppUserController(BooksContext context, IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;
     }
-    
+
     [HttpGet("getUsers")]
     public IActionResult GetAppUsers()
     {
@@ -36,7 +36,7 @@ public class AppUserController : ControllerBase
     public IActionResult RegisterUser(RegisterRequest model)
     {
         var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt(model.Password);
-    
+
         var user = new AppUser()
         {
             Email = model.Email,
@@ -46,20 +46,25 @@ public class AppUserController : ControllerBase
             RefreshToken = SecurityHelpers.GenerateRefreshToken(),
             RefreshTockenExp = DateTime.Now.AddDays(1)
         };
-    
+
         _context.AppUsers.Add(user);
         _context.SaveChanges();
-    
+
         return Ok();
     }
 
-    [Authorize(Roles = "admin")]
+    // [Authorize(Roles = "admin")]
+    [Authorize]
     [HttpGet("SecretData")]
     public IActionResult GetSecretData()
     {
-        var claimsFromAccessToken = User.Claims;
-        var roles = User.Claims.Where(c => c.Type == "role").Select(c => c.Value).ToList();
-        return Ok("Secret Data");
+        var roles = User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value).ToList();
+        if (roles.Any())
+        {
+            return Ok(roles);
+        }
+
+        return Unauthorized();
     }
 
     [AllowAnonymous]
@@ -88,7 +93,7 @@ public class AppUserController : ControllerBase
         {
             new Claim(ClaimTypes.Name, "pgago"),
             new Claim(ClaimTypes.Role, "admin"),
-            
+
             //Add additional data here
         };
 
@@ -113,9 +118,8 @@ public class AppUserController : ControllerBase
             accessToken = new JwtSecurityTokenHandler().WriteToken(token),
             refreshToken = user.RefreshToken
         });
- 
     }
-    
+
     [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme")]
     [HttpPost("refresh")]
     public IActionResult Refresh(RefreshTokenRequest refreshToken)
@@ -130,7 +134,7 @@ public class AppUserController : ControllerBase
         {
             throw new SecurityTokenException("Refresh token expired");
         }
-        
+
         Claim[] userclaim = new[]
         {
             new Claim(ClaimTypes.Name, "pgago"),
@@ -160,5 +164,4 @@ public class AppUserController : ControllerBase
             refreshToken = user.RefreshToken
         });
     }
- 
 }
