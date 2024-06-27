@@ -48,6 +48,9 @@ public partial class BooksContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.RefreshTockenExp).HasColumnType("datetime");
+            entity.Property(e => e.Role)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Company>(entity =>

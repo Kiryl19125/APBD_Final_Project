@@ -36,11 +36,11 @@ public class AppUserController : ControllerBase
     public IActionResult RegisterUser(RegisterRequest model)
     {
         var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt(model.Password);
-
         var user = new AppUser()
         {
             Email = model.Email,
             Login = model.Login,
+            Role = model.Role,
             Password = hashedPasswordAndSalt.Item1,
             Salt = hashedPasswordAndSalt.Item2,
             RefreshToken = SecurityHelpers.GenerateRefreshToken(),
@@ -53,7 +53,7 @@ public class AppUserController : ControllerBase
         return Ok();
     }
 
-    // [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     [Authorize]
     [HttpGet("SecretData")]
     public IActionResult GetSecretData()
@@ -88,11 +88,10 @@ public class AppUserController : ControllerBase
             return Unauthorized();
         }
 
-
         Claim[] userclaim = new[]
         {
-            new Claim(ClaimTypes.Name, "pgago"),
-            new Claim(ClaimTypes.Role, "admin"),
+            new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.Role, user.Role.ToLower()),
 
             //Add additional data here
         };
@@ -137,8 +136,8 @@ public class AppUserController : ControllerBase
 
         Claim[] userclaim = new[]
         {
-            new Claim(ClaimTypes.Name, "pgago"),
-            new Claim(ClaimTypes.Role, "admin")
+            new Claim(ClaimTypes.Name, user.Login),
+            new Claim(ClaimTypes.Role, user.Role.ToLower())
             //Add additional data here
         };
 
