@@ -73,27 +73,29 @@ public partial class BooksContext : DbContext
 
         modelBuilder.Entity<Contract>(entity =>
         {
-            entity.HasKey(e => e.ContractId).HasName("PK__Contract__C90D34091C187DFD");
+            entity.HasKey(e => e.ContractId).HasName("PK__Contract__C90D34098ABA15BE");
 
             entity.Property(e => e.ContractId).HasColumnName("ContractID");
             entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
             entity.Property(e => e.DiscountId).HasColumnName("DiscountID");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.Payed).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.SoftwareId).HasColumnName("SoftwareID");
             entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)");
 
             entity.HasOne(d => d.Customer).WithMany(p => p.Contracts)
                 .HasForeignKey(d => d.CustomerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Contracts__Custo__68487DD7");
+                .HasConstraintName("FK__Contracts__Custo__1BC821DD");
 
             entity.HasOne(d => d.Discount).WithMany(p => p.Contracts)
                 .HasForeignKey(d => d.DiscountId)
-                .HasConstraintName("FK__Contracts__Disco__6A30C649");
+                .HasConstraintName("FK__Contracts__Disco__1DB06A4F");
 
             entity.HasOne(d => d.Software).WithMany(p => p.Contracts)
                 .HasForeignKey(d => d.SoftwareId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Contracts__Softw__693CA210");
+                .HasConstraintName("FK__Contracts__Softw__1CBC4616");
         });
 
         modelBuilder.Entity<Customer>(entity =>
@@ -126,7 +128,7 @@ public partial class BooksContext : DbContext
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A58AD82ABDE");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A58D81CBEC4");
 
             entity.Property(e => e.PaymentId).HasColumnName("PaymentID");
             entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
@@ -135,7 +137,7 @@ public partial class BooksContext : DbContext
             entity.HasOne(d => d.Contract).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.ContractId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Payments__Contra__6D0D32F4");
+                .HasConstraintName("FK__Payments__Contra__208CD6FA");
         });
 
         modelBuilder.Entity<Software>(entity =>

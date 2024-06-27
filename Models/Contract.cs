@@ -17,9 +17,13 @@ public partial class Contract
 
     public decimal TotalAmount { get; set; }
 
+    public decimal Payed { get; set; }
+
     public int? DiscountId { get; set; }
 
     public bool IsSigned { get; set; }
+
+    public bool IsActive { get; set; }
 
     public virtual Customer Customer { get; set; } = null!;
 

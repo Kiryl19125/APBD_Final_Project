@@ -1,7 +1,9 @@
+using System.Runtime.CompilerServices;
 using FinalProjectAPBD.Context;
 using FinalProjectAPBD.Models;
 using FinalProjectAPBD.Models.RequestModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,7 +20,7 @@ public class CustomerController : ControllerBase
         _context = context;
     }
 
-    [Authorize(Roles = "admin")]
+    // [Authorize(Roles = "admin")]
     [HttpDelete("deleteCustomer")]
     public async Task<IActionResult> DeleteCustomer(DeleteCustomerModel model)
     {
@@ -29,7 +31,7 @@ public class CustomerController : ControllerBase
         return Ok("customer deleted successfully.");
     }
 
-    [Authorize(Roles = "admin")]
+    // [Authorize(Roles = "admin")]
     [HttpPut("updateCustomerData")]
     public async Task<IActionResult> UpdateCustomerData(UpdateCustomerModel model)
     {
@@ -50,7 +52,7 @@ public class CustomerController : ControllerBase
         return Ok($"customer with PESEL: {model.PESEL} updated successfully");
     }
 
-    [Authorize(Roles = "admin,user")]
+    // [Authorize(Roles = "admin,user")]
     [HttpPost("addNewCustomer")]
     public async Task<IActionResult> AddNewCustomer(AddNewCustomerModel model)
     {
@@ -71,7 +73,7 @@ public class CustomerController : ControllerBase
         return Ok("new customer was added successfully.");
     }
 
-    [Authorize(Roles = "user,admin")]
+    // [Authorize(Roles = "user,admin")]
     [HttpPost("createNewContract")]
     public async Task<IActionResult> CreateContract(CreateCustomerContractModel model)
     {
@@ -115,12 +117,53 @@ public class CustomerController : ControllerBase
             EndDate = model.EndDate,
             TotalAmount = discountedPrice,
             DiscountId = model.DiscountID,
-            IsSigned = false
+            IsSigned = false,
+            IsActive = true
+            
         };
 
         await _context.Contracts.AddAsync(newContract);
         await _context.SaveChangesAsync();
         return Ok("New contract was created");
+    }
+
+    [HttpPost("makePayments")]
+    public async Task<IActionResult> ProcessPayment(ProcessPaymentRequestModel model)
+    {
+        var contract = await _context.Contracts.FindAsync(model.ContractID);
+        if (contract == null)
+            return BadRequest($"contract of id: {model.ContractID} does not exist");
+
+        if (DateTime.Now > contract.EndDate)
+            return BadRequest("Contract end date is expired");
+        
+        var customer = await _context.Customers.FindAsync(model.CustomerID);
+        if (customer == null)
+            return BadRequest($"customer of id: {model.CustomerID} does not exist");
+
+        if (contract.Payed + model.Amount <= contract.TotalAmount)
+            contract.Payed += model.Amount;
+        else
+            return BadRequest($"Amount: {model.Amount} overflow");
+
+        if (contract.Payed == contract.TotalAmount)
+        {
+            contract.IsActive = false;
+            // return Ok("Contract is fully payed");
+        }
+        
+
+        var newPayment = new Payment()
+        {
+            ContractId = model.ContractID,
+            PaymentDate = DateTime.Now,
+            Amount = model.Amount
+        };
+
+        await _context.Payments.AddAsync(newPayment);
+        await _context.SaveChangesAsync();
+
+        return Ok("Payment was created successfully");
     }
 
     [HttpGet("showCustomersSoftware/{customerId:int}")]
