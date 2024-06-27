@@ -6,6 +6,7 @@ using FinalProjectAPBD.Helpers;
 using FinalProjectAPBD.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using JwtSecurityToken = System.IdentityModel.Tokens.Jwt.JwtSecurityToken;
 
@@ -13,12 +14,12 @@ namespace FinalProjectAPBD.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AppUserController : ControllerBase
+public class RegistrationController : ControllerBase
 {
     private BooksContext _context;
     private IConfiguration _configuration;
 
-    public AppUserController(BooksContext context, IConfiguration configuration)
+    public RegistrationController(BooksContext context, IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;
@@ -33,7 +34,7 @@ public class AppUserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("register")]
-    public IActionResult RegisterUser(RegisterRequest model)
+    public async Task<IActionResult> RegisterUser(RegisterRequest model)
     {
         var hashedPasswordAndSalt = SecurityHelpers.GetHashedPasswordAndSalt(model.Password);
         var user = new AppUser()
@@ -47,8 +48,8 @@ public class AppUserController : ControllerBase
             RefreshTockenExp = DateTime.Now.AddDays(1)
         };
 
-        _context.AppUsers.Add(user);
-        _context.SaveChanges();
+        await _context.AppUsers.AddAsync(user);
+        await _context.SaveChangesAsync();
 
         return Ok();
     }
@@ -76,9 +77,9 @@ public class AppUserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public IActionResult Login(LoginRequest loginRequest)
+    public async Task<IActionResult> Login(LoginRequest loginRequest)
     {
-        AppUser user = _context.AppUsers.Where(u => u.Login == loginRequest.Login).FirstOrDefault();
+        AppUser user = await _context.AppUsers.Where(u => u.Login == loginRequest.Login).FirstOrDefaultAsync();
 
         string passwordHashFromDb = user.Password;
         string curHashedPassword = SecurityHelpers.GetHashedPasswordWithSalt(loginRequest.Password, user.Salt);
@@ -110,7 +111,7 @@ public class AppUserController : ControllerBase
 
         user.RefreshToken = SecurityHelpers.GenerateRefreshToken();
         user.RefreshTockenExp = DateTime.Now.AddDays(1);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return Ok(new
         {
@@ -121,9 +122,9 @@ public class AppUserController : ControllerBase
 
     [Authorize(AuthenticationSchemes = "IgnoreTokenExpirationScheme")]
     [HttpPost("refresh")]
-    public IActionResult Refresh(RefreshTokenRequest refreshToken)
+    public async Task<IActionResult> Refresh(RefreshTokenRequest refreshToken)
     {
-        AppUser user = _context.AppUsers.Where(u => u.RefreshToken == refreshToken.RefreshToken).FirstOrDefault();
+        AppUser user = await _context.AppUsers.Where(u => u.RefreshToken == refreshToken.RefreshToken).FirstOrDefaultAsync();
         if (user == null)
         {
             throw new SecurityTokenException("Invalid refresh token");
@@ -155,7 +156,7 @@ public class AppUserController : ControllerBase
 
         user.RefreshToken = SecurityHelpers.GenerateRefreshToken();
         user.RefreshTockenExp = DateTime.Now.AddDays(1);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         return Ok(new
         {
