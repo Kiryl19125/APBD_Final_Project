@@ -1,4 +1,5 @@
 using FinalProjectAPBD.Context;
+using FinalProjectAPBD.Models;
 using FinalProjectAPBD.Models.ResponceModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,16 +23,22 @@ public class IncomeController : ControllerBase
     [HttpGet("calculateTotalIncome")]
     public async Task<IActionResult> CalculateCurrentIncome(string currency)
     {
-        var totalIncome = await _context.Payments.SumAsync(p => p.Amount);
-        // var convertedCurrency = await ConvertCurrency(totalIncome, "PLN", currency);
+        var totalIncomeCustomers = await _context.Payments.SumAsync(p => p.Amount);
+        var totalIncomeCompanies = await _context.PaymentsCompanies.SumAsync(p => p.Amount);
+        var totalIncome = totalIncomeCustomers + totalIncomeCompanies;
+        totalIncome = await ConvertCurrency(totalIncome, "PLN", currency);
         return Ok($"Total company income is: {totalIncome} {currency}");
     }
 
     [HttpGet("calculateIncomeForSoftware")]
-    public async Task<IActionResult> CalculateCurrentIncomeForSoftware(int softwareId)
+    public async Task<IActionResult> CalculateCurrentIncomeForSoftware(int softwareId, string currency)
     {
-        var totalIncome =
+        var totalIncomeCustomers =
             await _context.Payments.Where(p => p.Contract.SoftwareId == softwareId).SumAsync(p => p.Amount);
+        var totalIncomeCompanies =
+            await _context.PaymentsCompanies.Where(p => p.Contract.SoftwareId == softwareId).SumAsync(p => p.Amount);
+        var totalIncome = totalIncomeCustomers + totalIncomeCompanies;
+        totalIncome = await ConvertCurrency(totalIncome, "PLN", currency);
         return Ok($"Total income for software of id: {softwareId} = {totalIncome}");
     }
 
@@ -39,44 +46,38 @@ public class IncomeController : ControllerBase
     [HttpGet("calculateExpectedIncome")]
     public async Task<IActionResult> CalculateExpectedIncome(string currency)
     {
-        var totalIncome = await _context.Contracts.SumAsync(c => c.TotalAmount);
+        var totalIncomeCustomers = await _context.Contracts.SumAsync(c => c.TotalAmount);
+        var totalIncomeCompanies = await _context.ContractsCompanies.SumAsync(c => c.TotalAmount);
+        var totalIncome = totalIncomeCustomers + totalIncomeCompanies;
+        totalIncome = await ConvertCurrency(totalIncome, "PLN", currency);
         return Ok($"Expected income is: {totalIncome} {currency}");
     }
 
     [HttpGet("calculateExpectedIncomeForSoftware")]
-    public async Task<IActionResult> CalculateExpectedIncomeForSoftware(int softwareId)
+    public async Task<IActionResult> CalculateExpectedIncomeForSoftware(int softwareId, string currency)
     {
-        var totalIncome = await _context.Contracts.Where(c => c.SoftwareId == softwareId)
+        var totalIncomeCustomers = await _context.Contracts.Where(c => c.SoftwareId == softwareId)
             .SumAsync(c => c.TotalAmount);
+        var totalIncomeCompanies = await _context.ContractsCompanies.Where(c => c.SoftwareId == softwareId)
+            .SumAsync(c => c.TotalAmount);
+        var totalIncome = totalIncomeCustomers + totalIncomeCompanies;
+        totalIncome = await ConvertCurrency(totalIncome, "PLN", currency);
 
         return Ok($"Expected income for the software of id {softwareId} is: {totalIncome}");
     }
 
 
-    // public IActionResult CalculateExpectedIncome()
-    // {
-    //     
-    // }
-
-    // TODO! FIX
     private async Task<decimal> ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
     {
+        var apiKey = "8126d67dda6f63c7566c7f95";
+        var url = $"https://v6.exchangerate-api.com/v6/{apiKey}/latest/{fromCurrency}";
+
         using (var client = new HttpClient())
         {
-            var apiKey = "8df5647f999907ba2eb3be42fed8d7a5";
-            var url =
-                $"https://api.exchangeratesapi.io/latest?base={fromCurrency}&symbols={toCurrency}&access_key={apiKey}";
-            var response = await client.GetStringAsync(url);
-            var rates = JsonConvert.DeserializeObject<CurrencyResponseModel>(response);
-
-            if (rates.Rates.TryGetValue(toCurrency.ToUpper(), out var rate))
-            {
-                return amount * rate;
-            }
-            else
-            {
-                throw new Exception("Invalid currency or conversion rate not found.");
-            }
+            var respone = await client.GetStringAsync(url);
+            ExchangeRatesModel exchangeRates = JsonConvert.DeserializeObject<ExchangeRatesModel>(respone);
+            exchangeRates.conversion_rates.TryGetValue(toCurrency, out decimal rate);
+            return amount * rate;
         }
     }
 }
