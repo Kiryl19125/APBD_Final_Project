@@ -118,7 +118,7 @@ public class CustomerController : ControllerBase
             TotalAmount = discountedPrice,
             DiscountId = model.DiscountID,
             IsSigned = false,
-            IsActive = true
+            IsActive = model.IsActive
             
         };
 
@@ -158,7 +158,7 @@ public class CustomerController : ControllerBase
         var newPayment = new Payment()
         {
             ContractId = model.ContractID,
-            PaymentDate = DateTime.Now,
+            PaymentDate = model.PaymentDate,
             Amount = model.Amount
         };
 

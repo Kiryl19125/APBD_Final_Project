@@ -16,4 +16,6 @@ public partial class Software
     public string? Category { get; set; }
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
+
+    public virtual ICollection<ContractsCompany> ContractsCompanies { get; set; } = new List<ContractsCompany>();
 }

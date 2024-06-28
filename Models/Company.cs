@@ -16,4 +16,6 @@ public partial class Company
     public string PhoneNumber { get; set; } = null!;
 
     public string Krs { get; set; } = null!;
+
+    public virtual ICollection<ContractsCompany> ContractsCompanies { get; set; } = new List<ContractsCompany>();
 }

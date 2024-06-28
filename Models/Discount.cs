@@ -18,4 +18,6 @@ public partial class Discount
     public DateOnly EndDate { get; set; }
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
+
+    public virtual ICollection<ContractsCompany> ContractsCompanies { get; set; } = new List<ContractsCompany>();
 }
