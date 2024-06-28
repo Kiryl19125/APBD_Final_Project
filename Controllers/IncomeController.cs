@@ -2,6 +2,7 @@ using FinalProjectAPBD.Context;
 using FinalProjectAPBD.Helpers;
 using FinalProjectAPBD.Models;
 using FinalProjectAPBD.Services.IncomeService;
+using Microsoft.AspNetCore.Authorization;
 // using FinalProjectAPBD.Models.ResponceModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,8 @@ public class IncomeController : ControllerBase
         _service = service;
     }
 
+    
+    [Authorize(Roles = "admin,user")]
     [HttpGet("calculateTotalIncome")]
     public async Task<IActionResult> CalculateCurrentIncome(string currency)
     {
@@ -34,6 +37,8 @@ public class IncomeController : ControllerBase
         }
     }
 
+    
+    [Authorize(Roles = "admin,user")]
     [HttpGet("calculateIncomeForSoftware")]
     public async Task<IActionResult> CalculateCurrentIncomeForSoftware(int softwareId, string currency)
     {
@@ -49,6 +54,8 @@ public class IncomeController : ControllerBase
     }
 
 
+    
+    [Authorize(Roles = "admin,user")]
     [HttpGet("calculateExpectedIncome")]
     public async Task<IActionResult> CalculateExpectedIncome(string currency)
     {
@@ -63,6 +70,8 @@ public class IncomeController : ControllerBase
         }
     }
 
+    
+    [Authorize(Roles = "admin,user")]
     [HttpGet("calculateExpectedIncomeForSoftware")]
     public async Task<IActionResult> CalculateExpectedIncomeForSoftware(int softwareId, string currency)
     {

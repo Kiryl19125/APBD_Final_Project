@@ -19,7 +19,7 @@ public class CompanyController : ControllerBase
         _service = service;
     }
 
-    // [Authorize(Roles = "admin,user")]
+    [Authorize(Roles = "admin,user")]
     [HttpPost("addNewCompany")]
     public async Task<IActionResult> AddNewCompany(AddNewCompanyModel model)
     {
@@ -36,7 +36,7 @@ public class CompanyController : ControllerBase
     }
 
 
-    // [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     [HttpPut("updateCompanyData")]
     public async Task<IActionResult> UpdateCompanyData(UpdateCompanyModel model)
     {
@@ -52,6 +52,7 @@ public class CompanyController : ControllerBase
         return Ok($"company with KRS: {model.Krs} updated successfully");
     }
 
+    [Authorize(Roles = "admin,user")]
     [HttpPost("createNewContractCompany")]
     public async Task<IActionResult> CreateContractCompany(CreateCompanyContractModel model)
     {
@@ -67,6 +68,8 @@ public class CompanyController : ControllerBase
         return Ok("New contract with company was created");
     }
 
+    
+    [Authorize(Roles = "admin,user")]
     [HttpPost("makePaymentCompany")]
     public async Task<IActionResult> ProcessPaymentCompany(ProcessPaymentCompanyRequestModel model)
     {

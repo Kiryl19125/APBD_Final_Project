@@ -21,7 +21,7 @@ public class CustomerController : ControllerBase
         _service = service;
     }
 
-    // [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     [HttpDelete("deleteCustomer")]
     public async Task<IActionResult> DeleteCustomer(DeleteCustomerModel model)
     {
@@ -37,7 +37,7 @@ public class CustomerController : ControllerBase
         return Ok("customer deleted successfully.");
     }
 
-    // [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     [HttpPut("updateCustomerData")]
     public async Task<IActionResult> UpdateCustomerData(UpdateCustomerModel model)
     {
@@ -53,7 +53,7 @@ public class CustomerController : ControllerBase
         return Ok($"customer with PESEL: {model.PESEL} updated successfully");
     }
 
-    // [Authorize(Roles = "admin,user")]
+    [Authorize(Roles = "admin,user")]
     [HttpPost("addNewCustomer")]
     public async Task<IActionResult> AddNewCustomer(AddNewCustomerModel model)
     {
@@ -69,7 +69,7 @@ public class CustomerController : ControllerBase
         return Ok("new customer was added successfully.");
     }
 
-    // [Authorize(Roles = "user,admin")]
+    [Authorize(Roles = "user,admin")]
     [HttpPost("createNewContract")]
     public async Task<IActionResult> CreateContract(CreateCustomerContractModel model)
     {
@@ -85,6 +85,8 @@ public class CustomerController : ControllerBase
         return Ok("New contract was created");
     }
 
+    
+    [Authorize(Roles = "admin,user")]
     [HttpPost("makePayments")]
     public async Task<IActionResult> ProcessPayment(ProcessPaymentRequestModel model)
     {
