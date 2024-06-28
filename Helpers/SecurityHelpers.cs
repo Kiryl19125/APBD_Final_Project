@@ -61,8 +61,6 @@ public class SecurityHelpers
             ValidateIssuer = true,
             ValidateActor = true,
             ClockSkew = TimeSpan.FromMinutes(2),
-            // ValidIssuer = "https://localhost:5278", //should come from configuration
-            // ValidAudience = "https://localhost:5278", //should come from configuration
             ValidIssuer = configuration["ValidIssuer"],
             ValidAudience = configuration["ValidAudience"],
             ValidateLifetime = false, // We don't validate lifetime

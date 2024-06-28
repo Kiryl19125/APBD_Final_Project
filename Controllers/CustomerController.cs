@@ -25,7 +25,14 @@ public class CustomerController : ControllerBase
     [HttpDelete("deleteCustomer")]
     public async Task<IActionResult> DeleteCustomer(DeleteCustomerModel model)
     {
-        await _service.DeleteCustomer(model);
+        try
+        {
+            await _service.DeleteCustomer(model);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
 
         return Ok("customer deleted successfully.");
     }
@@ -34,7 +41,14 @@ public class CustomerController : ControllerBase
     [HttpPut("updateCustomerData")]
     public async Task<IActionResult> UpdateCustomerData(UpdateCustomerModel model)
     {
-        await _service.UpdateCustomerData(model);
+        try
+        {
+            await _service.UpdateCustomerData(model);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
 
         return Ok($"customer with PESEL: {model.PESEL} updated successfully");
     }
@@ -43,7 +57,14 @@ public class CustomerController : ControllerBase
     [HttpPost("addNewCustomer")]
     public async Task<IActionResult> AddNewCustomer(AddNewCustomerModel model)
     {
-        await _service.AddNewCustomer(model);
+        try
+        {
+            await _service.AddNewCustomer(model);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
 
         return Ok("new customer was added successfully.");
     }
@@ -52,14 +73,30 @@ public class CustomerController : ControllerBase
     [HttpPost("createNewContract")]
     public async Task<IActionResult> CreateContract(CreateCustomerContractModel model)
     {
-        await _service.CreateContract(model);
+        try
+        {
+            await _service.CreateContract(model);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
         return Ok("New contract was created");
     }
 
     [HttpPost("makePayments")]
     public async Task<IActionResult> ProcessPayment(ProcessPaymentRequestModel model)
     {
-        await _service.ProcessPayment(model);
+        try
+        {
+            await _service.ProcessPayment(model);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+
         return Ok("Payment was created successfully");
     }
 }

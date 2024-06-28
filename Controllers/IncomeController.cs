@@ -23,29 +23,57 @@ public class IncomeController : ControllerBase
     [HttpGet("calculateTotalIncome")]
     public async Task<IActionResult> CalculateCurrentIncome(string currency)
     {
-        var income = await _service.CalculateCurrentIncome(currency);
-        return Ok($"Total company income is: {income} {currency}");
+        try
+        {
+            var income = await _service.CalculateCurrentIncome(currency);
+            return Ok($"Total company income is: {income} {currency}");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpGet("calculateIncomeForSoftware")]
     public async Task<IActionResult> CalculateCurrentIncomeForSoftware(int softwareId, string currency)
     {
-        var income = await _service.CalculateCurrentIncomeForSoftware(softwareId, currency);
-        return Ok($"Total income for software of id: {softwareId} = {income} {currency}");
+        try
+        {
+            var income = await _service.CalculateCurrentIncomeForSoftware(softwareId, currency);
+            return Ok($"Total income for software of id: {softwareId} = {income} {currency}");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
 
     [HttpGet("calculateExpectedIncome")]
     public async Task<IActionResult> CalculateExpectedIncome(string currency)
     {
-        var income = await _service.CalculateExpectedIncome(currency);
-        return Ok($"Expected income is: {income} {currency}");
+        try
+        {
+            var income = await _service.CalculateExpectedIncome(currency);
+            return Ok($"Expected income is: {income} {currency}");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpGet("calculateExpectedIncomeForSoftware")]
     public async Task<IActionResult> CalculateExpectedIncomeForSoftware(int softwareId, string currency)
     {
-        var income = await _service.CalculateExpectedIncomeForSoftware(softwareId, currency);
-        return Ok($"Expected income for the software of id {softwareId} is: {income} {currency}");
+        try
+        {
+            var income = await _service.CalculateExpectedIncomeForSoftware(softwareId, currency);
+            return Ok($"Expected income for the software of id {softwareId} is: {income} {currency}");
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 }

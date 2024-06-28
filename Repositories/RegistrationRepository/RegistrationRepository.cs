@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using FinalProjectAPBD.Context;
+using FinalProjectAPBD.Exceptions;
 using FinalProjectAPBD.Helpers;
 using FinalProjectAPBD.Models;
 using FinalProjectAPBD.Models.ResponseModels;
@@ -29,22 +30,20 @@ public class RegistrationRepository : IRegistrationRepository
 
     public async Task<LoginResponceModel> Login(LoginRequest model)
     {
-        AppUser user = await _context.AppUsers.Where(u => u.Login == model.Login).FirstOrDefaultAsync();
+        var user = await _context.AppUsers.Where(u => u.Login == model.Login).FirstOrDefaultAsync();
 
         string passwordHashFromDb = user.Password;
         string curHashedPassword = SecurityHelpers.GetHashedPasswordWithSalt(model.Password, user.Salt);
 
         if (passwordHashFromDb != curHashedPassword)
         {
-            throw new Exception("Unathorize"); // TODO! make custom exception
+            throw new NotAuthorize("Not Authorize"); // TODO! make custom exception
         }
 
         Claim[] userclaim = new[]
         {
             new Claim(ClaimTypes.Name, user.Login),
             new Claim(ClaimTypes.Role, user.Role.ToLower()),
-
-            //Add additional data here
         };
 
         SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
@@ -52,9 +51,6 @@ public class RegistrationRepository : IRegistrationRepository
         SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken token = new JwtSecurityToken(
-            // issuer: "https://localhost:5278", // TODO! load from configuration
-            // audience: "https://localhost:5278",
-            
             issuer: _configuration["ValidIssuer"],
             audience: _configuration["ValidAudience"],
             claims: userclaim,
@@ -92,7 +88,6 @@ public class RegistrationRepository : IRegistrationRepository
         {
             new Claim(ClaimTypes.Name, user.Login),
             new Claim(ClaimTypes.Role, user.Role.ToLower())
-            //Add additional data here
         };
 
         SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["SecretKey"]));
@@ -100,11 +95,8 @@ public class RegistrationRepository : IRegistrationRepository
         SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken jwtToken = new JwtSecurityToken(
-            // issuer: "https://localhost:5278", // TODO! load from configuration
-            // audience: "https://localhost:5278",
             issuer: _configuration["ValidIssuer"],
             audience: _configuration["ValidAudience"],
-            
             claims: userclaim,
             expires: DateTime.Now.AddMinutes(10),
             signingCredentials: creds
