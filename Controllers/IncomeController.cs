@@ -1,7 +1,7 @@
 using FinalProjectAPBD.Context;
 using FinalProjectAPBD.Helpers;
 using FinalProjectAPBD.Models;
-using FinalProjectAPBD.Models.ResponceModels;
+// using FinalProjectAPBD.Models.ResponceModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -12,10 +12,10 @@ namespace FinalProjectAPBD.Controllers;
 [ApiController]
 public class IncomeController : ControllerBase
 {
-    private BooksContext _context;
+    private DBContext _context;
     private IConfiguration _configuration;
 
-    public IncomeController(BooksContext context, IConfiguration configuration)
+    public IncomeController(DBContext context, IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;

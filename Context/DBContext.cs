@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinalProjectAPBD.Context;
 
-public partial class BooksContext : DbContext
+public partial class DBContext : DbContext
 {
-    public BooksContext()
+    public DBContext()
     {
     }
 
-    public BooksContext(DbContextOptions<BooksContext> options)
+    public DBContext(DbContextOptions<DBContext> options)
         : base(options)
     {
     }

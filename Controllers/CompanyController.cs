@@ -12,9 +12,9 @@ namespace FinalProjectAPBD.Controllers;
 public class CompanyController : ControllerBase
 {
 
-    private BooksContext _context;
+    private DBContext _context;
 
-    public CompanyController(BooksContext context)
+    public CompanyController(DBContext context)
     {
         _context = context;
     }

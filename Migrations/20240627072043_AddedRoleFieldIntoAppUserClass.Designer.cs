@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace FinalProjectAPBD.Migrations
 {
-    [DbContext(typeof(BooksContext))]
+    [DbContext(typeof(DBContext))]
     [Migration("20240627072043_AddedRoleFieldIntoAppUserClass")]
     partial class AddedRoleFieldIntoAppUserClass
     {

@@ -13,9 +13,9 @@ namespace FinalProjectAPBD.Controllers;
 [ApiController]
 public class CustomerController : ControllerBase
 {
-    private BooksContext _context;
+    private DBContext _context;
 
-    public CustomerController(BooksContext context)
+    public CustomerController(DBContext context)
     {
         _context = context;
     }
