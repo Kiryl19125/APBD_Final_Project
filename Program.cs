@@ -1,9 +1,11 @@
 using System.Text;
 using FinalProjectAPBD.Context;
 using FinalProjectAPBD.Repositories;
+using FinalProjectAPBD.Repositories.CompanyRepository;
 using FinalProjectAPBD.Repositories.CustomerRepository;
 using FinalProjectAPBD.Repositories.IncomeRepository;
 using FinalProjectAPBD.Services;
+using FinalProjectAPBD.Services.CompanyService;
 using FinalProjectAPBD.Services.CustomerService;
 using FinalProjectAPBD.Services.IncomeService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,6 +29,9 @@ builder.Services.AddScoped<IIncomeService, IncomeService>();
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+builder.Services.AddScoped<ICompanyRepository, CompanyRepository>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
 
 builder.Services.AddDbContext<DBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

@@ -1,3 +1,4 @@
+using FinalProjectAPBD.Models;
 using FinalProjectAPBD.Models.RequestModels;
 using FinalProjectAPBD.Repositories.CustomerRepository;
 
@@ -24,7 +25,18 @@ public class CustomerService : ICustomerService
 
     public async Task AddNewCustomer(AddNewCustomerModel model)
     {
-        await _repository.AddNewCustomer(model);
+        
+        var newCustomer = new Customer()
+        {
+            Pesel = model.Pesel,
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Address = model.Address,
+            Email = model.Email,
+            PhoneNumber = model.PhoneNumber,
+            IsDeleted = false
+        };
+        await _repository.AddNewCustomer(newCustomer);
     }
 
     public async Task CreateContract(CreateCustomerContractModel model)

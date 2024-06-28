@@ -3,56 +3,47 @@ using FinalProjectAPBD.Models;
 using FinalProjectAPBD.Models.RequestModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace FinalProjectAPBD.Repositories.CustomerRepository;
+namespace FinalProjectAPBD.Repositories.CompanyRepository;
 
-public class CustomerRepository : ICustomerRepository
+public class CompanyRepository : ICompanyRepository
 {
+
     private readonly DBContext _context;
 
-    public CustomerRepository(DBContext context)
+    public CompanyRepository(DBContext context)
     {
         _context = context;
     }
 
-    public async Task DeleteCustomer(DeleteCustomerModel model)
+    public async Task AddNewCompany(Company company)
     {
-        var customer = await _context.Customers.SingleOrDefaultAsync(c => c.Pesel == model.PESEL);
-        if (customer == null) throw new Exception($"customer with PESEL: {model.PESEL} not found");
-        customer.IsDeleted = true;
+        await _context.Companies.AddAsync(company);
         await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateCustomerData(UpdateCustomerModel model)
+    public async Task UpdateCompanyData(UpdateCompanyModel model)
     {
-        var customer = await _context.Customers.SingleOrDefaultAsync(c => c.Pesel == model.PESEL);
-        if (customer == null) throw new Exception($"customer with PESEL: {model.PESEL} not found");
-        if (customer.IsDeleted)
+        var company = await _context.Companies.SingleOrDefaultAsync(c => c.Krs == model.Krs);
+        if (company == null)
         {
-            throw new Exception($"Customer with PESEL: {model.PESEL} deleted");
+            // return NotFound($"company with KRS: {model.Krs} not fount");
+            throw new Exception($"company with KRS: {model.Krs} not fount");
         }
+        company.CompanyName = model.CompanyName;
+        company.Address = model.Address;
+        company.Email = model.Email;
+        company.PhoneNumber = model.PhoneNumber;
 
-        customer.FirstName = model.FirstName;
-        customer.LastName = model.LastName;
-        customer.Address = model.Address;
-        customer.Email = model.Email;
-        customer.PhoneNumber = model.PhoneNumber;
         await _context.SaveChangesAsync();
     }
 
-    public async Task AddNewCustomer(Customer customer)
+    public async Task CreateContractCompany(CreateCompanyContractModel model)
     {
-        await _context.Customers.AddAsync(customer);
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task CreateContract(CreateCustomerContractModel model)
-    {
-        
         // check if customer already has this software
         // get customers software list
-        var softwareList = _context.Customers
-            .Where(c => c.CustomerId == model.CustomerID)
-            .SelectMany(c => c.Contracts)
+        var softwareList = _context.Companies
+            .Where(c => c.CompanyId == model.CompanyID)
+            .SelectMany(c => c.ContractsCompanies)
             .Select(c => c.Software)
             .ToList();
         if (softwareList.Any(s => s.SoftwareId == model.SoftwareID))
@@ -82,9 +73,9 @@ public class CustomerRepository : ICustomerRepository
         decimal discountedPrice = model.Price - (model.Price * (discount.DiscountPercentage / 100));
 
 
-        var newContract = new Contract()
+        var newContract = new ContractsCompany()
         {
-            CustomerId = model.CustomerID,
+            CompanyId = model.CompanyID,
             SoftwareId = model.SoftwareID,
             StartDate = model.StratDate,
             EndDate = model.EndDate,
@@ -92,19 +83,17 @@ public class CustomerRepository : ICustomerRepository
             DiscountId = model.DiscountID,
             IsSigned = false,
             IsActive = model.IsActive
-            
         };
 
-        await _context.Contracts.AddAsync(newContract);
+        await _context.ContractsCompanies.AddAsync(newContract);
         await _context.SaveChangesAsync();
     }
 
-    public async Task ProcessPayment(ProcessPaymentRequestModel model)
+    public async Task ProcessPaymentCompany(ProcessPaymentCompanyRequestModel model)
     {
-        
-        var contract = await _context.Contracts.FindAsync(model.ContractID);
+        var contract = await _context.ContractsCompanies.FindAsync(model.ContractID);
         if (contract == null)
-            throw new Exception($"contract of id: {model.ContractID} does not exist"); // TODO! make custom exception
+            throw new Exception($"contract of id: {model.ContractID} does not exist");
             // return BadRequest($"contract of id: {model.ContractID} does not exist");
 
         if (DateTime.Now > contract.EndDate)
@@ -113,10 +102,10 @@ public class CustomerRepository : ICustomerRepository
             // return BadRequest("Contract end date is expired");
         }
 
-        var customer = await _context.Customers.FindAsync(model.CustomerID);
+        var customer = await _context.Companies.FindAsync(model.CompanyID);
         if (customer == null)
-            throw new Exception($"customer of id: {model.CustomerID} does not exist");
-            // return BadRequest($"customer of id: {model.CustomerID} does not exist");
+            throw new Exception($"customer of id: {model.CompanyID} does not exist");
+            // return BadRequest($"customer of id: {model.CompanyID} does not exist");
 
             if (contract.Payed + model.Amount <= contract.TotalAmount)
                 contract.Payed += model.Amount;
@@ -131,14 +120,14 @@ public class CustomerRepository : ICustomerRepository
         }
 
 
-        var newPayment = new Payment()
+        var newPayment = new PaymentsCompany()
         {
             ContractId = model.ContractID,
             PaymentDate = model.PaymentDate,
             Amount = model.Amount
         };
 
-        await _context.Payments.AddAsync(newPayment);
+        await _context.PaymentsCompanies.AddAsync(newPayment);
         await _context.SaveChangesAsync();
     }
 }
