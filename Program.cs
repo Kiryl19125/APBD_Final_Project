@@ -80,8 +80,10 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true, //for whom
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(2),
-        ValidIssuer = "https://localhost:5278", //should come from configuration
-        ValidAudience = "https://localhost:5278", //should come from configuration
+        // ValidIssuer = "https://localhost:5278", //should come from configuration
+        // ValidAudience = "https://localhost:5278", //should come from configuration
+        ValidIssuer = builder.Configuration["ValidIssuer"],
+        ValidAudience = builder.Configuration["ValidAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["SecretKey"]))
     };
 
@@ -105,8 +107,10 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true, //for whom
         ValidateLifetime = false,
         ClockSkew = TimeSpan.FromMinutes(2),
-        ValidIssuer = "https://localhost:5278", //should come from configuration
-        ValidAudience = "https://localhost:5278", //should come from configuration
+        // ValidIssuer = "https://localhost:5278", //should come from configuration
+        // ValidAudience = "https://localhost:5278", //should come from configuration
+        ValidIssuer = builder.Configuration["ValidIssuer"],
+        ValidAudience = builder.Configuration["ValidAudience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["SecretKey"]))
     };
 });

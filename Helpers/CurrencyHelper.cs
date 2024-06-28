@@ -5,9 +5,9 @@ namespace FinalProjectAPBD.Helpers;
 
 public class CurrencyHelper
 {
-    public static async Task<decimal> ConvertCurrency(decimal amount, string fromCurrency, string toCurrency)
+    public static async Task<decimal> ConvertCurrency(decimal amount, string fromCurrency, string toCurrency, IConfiguration configuration)
     {
-        var apiKey = "8126d67dda6f63c7566c7f95";
+        var apiKey = configuration["CurrencyApiKey"];
         var url = $"https://v6.exchangerate-api.com/v6/{apiKey}/latest/{fromCurrency}";
 
         using (var client = new HttpClient())

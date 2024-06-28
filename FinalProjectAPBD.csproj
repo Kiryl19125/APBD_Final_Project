@@ -22,6 +22,7 @@
 
     <ItemGroup>
       <Folder Include="Context\" />
+      <Folder Include="Exceptions\" />
     </ItemGroup>
 
 </Project>

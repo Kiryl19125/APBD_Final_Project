@@ -52,8 +52,11 @@ public class RegistrationRepository : IRegistrationRepository
         SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken token = new JwtSecurityToken(
-            issuer: "https://localhost:5278", // TODO! load from configuration
-            audience: "https://localhost:5278",
+            // issuer: "https://localhost:5278", // TODO! load from configuration
+            // audience: "https://localhost:5278",
+            
+            issuer: _configuration["ValidIssuer"],
+            audience: _configuration["ValidAudience"],
             claims: userclaim,
             expires: DateTime.Now.AddMinutes(10),
             signingCredentials: creds
@@ -97,8 +100,11 @@ public class RegistrationRepository : IRegistrationRepository
         SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken jwtToken = new JwtSecurityToken(
-            issuer: "https://localhost:5278", // TODO! load from configuration
-            audience: "https://localhost:5278",
+            // issuer: "https://localhost:5278", // TODO! load from configuration
+            // audience: "https://localhost:5278",
+            issuer: _configuration["ValidIssuer"],
+            audience: _configuration["ValidAudience"],
+            
             claims: userclaim,
             expires: DateTime.Now.AddMinutes(10),
             signingCredentials: creds
