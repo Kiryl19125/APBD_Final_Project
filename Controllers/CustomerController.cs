@@ -135,7 +135,9 @@ public class CustomerController : ControllerBase
             return BadRequest($"contract of id: {model.ContractID} does not exist");
 
         if (DateTime.Now > contract.EndDate)
+        {
             return BadRequest("Contract end date is expired");
+        }
         
         var customer = await _context.Customers.FindAsync(model.CustomerID);
         if (customer == null)
